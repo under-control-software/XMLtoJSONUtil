@@ -2,7 +2,7 @@ const { Console } = require("console");
 const fs = require("fs");
 const parser = require("xml-js");
 
-fs.readFile("/users/shreeteshm/Downloads/c1r4.xml", "utf-8", (err, data) => {
+fs.readFile("/users/shreeteshm/Desktop/test.xml", "utf-8", (err, data) => {
   if (err) {
     console.log("ERROR:", err);
     return;
@@ -11,25 +11,23 @@ fs.readFile("/users/shreeteshm/Downloads/c1r4.xml", "utf-8", (err, data) => {
   const jsonData = JSON.parse(
     parser.xml2json(data, { compact: true, spaces: 4 })
   );
-  let innerData,
-    avgTime = 0,
+
+  let read = 0,
+    write = 0,
     count = 0;
-  console.log("Start Reading");
-  let time = [];
+
   jsonData.testResults.httpSample.forEach((value, ind) => {
     try {
-      innerData = JSON.parse(value.responseData["_text"]).data;
+      if (value.requestHeader._text.includes("localhost:5011")) {
+        read++;
+      } else if (value.requestHeader._text.includes("localhost:5012")) {
+        write++;
+      }
+    } catch (err) {
       count++;
-      //   if (parseInt(innerData.hero.queryTime) < 1) {
-      //     avgTime += 1;
-      //   } else {
-      //     avgTime += parseInt(innerData.hero.queryTime);
-      //   }
-      time.push(parseInt(innerData.hero.queryTime));
-    } catch (err) {}
+    }
   });
-  //   console.log("Average time:", avgTime / count);
-  time.sort();
-  const ind99 = Math.floor(0.99 * count);
-  console.log("99th Percentile time: ", time[ind99]);
+  console.log("Read:", read);
+  console.log("Write:", write);
+  console.log("Errors:", count);
 });
